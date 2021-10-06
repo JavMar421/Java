@@ -1,4 +1,4 @@
-package ejemplos;
+package ejemplos.ejemplo_funciones;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

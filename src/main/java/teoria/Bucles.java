@@ -29,5 +29,14 @@ public class Bucles {
 
         for (int i=0; i<=10; i++)
             System.out.println("Bucle Para "+i);
+
+        num=2;
+        switch (num){
+            case 1: {System.out.println("Caso 1: num="+num); break;}
+            case 2: {System.out.println("Caso 2: num="+num); break;}
+            default: {System.out.println("Caso por Defecto: num="+num); break;}
+
+
+        }
     }
 }

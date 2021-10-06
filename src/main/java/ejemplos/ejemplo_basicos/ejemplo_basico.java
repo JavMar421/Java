@@ -1,4 +1,4 @@
-package ejemplos;
+package ejemplos.ejemplo_basicos;
 
 public class ejemplo_basico {
 

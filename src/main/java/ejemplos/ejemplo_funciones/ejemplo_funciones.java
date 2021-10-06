@@ -1,4 +1,4 @@
-package ejemplos;
+package ejemplos.ejemplo_funciones;
 
 public class ejemplo_funciones {
     public static void main(String[] args) {
