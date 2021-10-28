@@ -1,14 +1,14 @@
-package ejemplos.ejemplo_hilos;
+package ejemplos.ejercicio_hilos;
 
 import java.util.ArrayList;
 
-public class Ejer_hilo1 {
+public class Main {
 
 
     static ArrayList<Hilo> listaHilosOrdenada = new ArrayList<>();
 
 
-    public static void ejer_hilo1(String[] args) {
+    public static void main(String[] args) {
 
         ArrayList<Hilo> listaHilos = new ArrayList<>();
 
