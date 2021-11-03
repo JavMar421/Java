@@ -1,65 +1,29 @@
+
 import java.util.ArrayList;
 
+public class main {
 
-public class Main {
-    static ArrayList<Hilo> listaHilos = new ArrayList<>();
+    static ArrayList<cliente> clilistaOrdenada = new ArrayList<>() {
+    };
 
-    public static void main(String[] args) {
-
-        ArrayList<Hilo> listaHilos = new ArrayList<>();
-
-        for (int i = 0; i < 100; i++){
-            Hilo h = new Hilo(i);
-            listaHilos.add(h);
+    public static void main(String args[]) throws InterruptedException {
+        ArrayList<cliente> clilista = new ArrayList<>();
+        int total=0;
+        for (int i = 0; i < 100; i++) {
+            cliente h = new cliente(i);
             h.start();
+            clilista.add(h);
         }
-
-        for (Hilo h : listaHilos) {
+        for (cliente h : clilista) {
             try {
                 h.join();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-        System.out.println(escribirFinalistas());
-        System.out.println(escribirSubCampeones());
-    }
-    public static String escribirFinalistas(){
-        String finalistas="Hilos finalistas:\n";
-
-            int max=0;
-            for (Hilo h : listaHilos){
-                if(h.contador>max){
-                    max=h.contador;}
-            }
-        for (Hilo h : listaHilos)
-            if(h.contador == max){
-                finalistas+= "Soy el hilo " + h.numero + " y he dormido " + h.contador + " veces\n";
-            }
-
-        return finalistas;
-    }
-
-    public static String escribirSubCampeones(){
-        String subcampeones="Hilos subcampeones:\n";
-
-
-        int max=0;
-        int subcamp=0;
-        for (Hilo h : listaHilos){
-            if(h.contador>max){
-                max=h.contador;}
+        for (cliente hilo: clilistaOrdenada) {
+             total += hilo.dinero;
         }
-        for (Hilo h : listaHilos){
-            if(h.contador>subcamp && h.contador<max){
-                subcamp=h.contador;}
-        }
-        for (Hilo h : listaHilos)
-            if(h.contador == subcamp){
-                subcampeones+="Soy el hilo " + h.numero + " y he dormido " + h.contador + " veces\n";
-            }
-
-        return subcampeones;
+        System.out.println(cajero.Resultado());
     }
-
 }

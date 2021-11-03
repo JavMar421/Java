@@ -1,3 +1,5 @@
+package ejemplos.ejercicio_hilos2;
+
 import java.util.Random;
 
 public class Hilo extends Thread {

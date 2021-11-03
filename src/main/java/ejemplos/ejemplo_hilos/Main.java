@@ -6,8 +6,8 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Comenzamos a las " + System.currentTimeMillis());
 
-        Hilo h1 = new Hilo("Hilo 1");
-        Hilo h2 = new Hilo("Hilo 2");
+        Hilo h1 = new Hilo("ejemplos.ejercicio_hilos2.Hilo 1");
+        Hilo h2 = new Hilo("ejemplos.ejercicio_hilos2.Hilo 2");
 
 
 
