@@ -1,24 +1,24 @@
-package ejemplos.ejercicio_hilos2;
+package ejemplos.ejercicio_hilos.ejercicio_hilos2;
 
-import ejemplos.ejercicio_hilos2.Hilo;
+import ejemplos.ejercicio_hilos.Hilotal;
 
 import java.util.ArrayList;
 
 
 public class Main {
-    static ArrayList<Hilo> listaHilos = new ArrayList<>();
+    static ArrayList<Hilotal> listaHilotals = new ArrayList<>();
 
     public static void main(String[] args) {
 
-        ArrayList<Hilo> listaHilos = new ArrayList<>();
+        ArrayList<Hilotal> listaHilotals = new ArrayList<>();
 
         for (int i = 0; i < 100; i++){
-            Hilo h = new Hilo(i);
-            listaHilos.add(h);
+            Hilotal h = new Hilotal(i);
+            listaHilotals.add(h);
             h.start();
         }
 
-        for (Hilo h : listaHilos) {
+        for (Hilotal h : listaHilotals) {
             try {
                 h.join();
             } catch (InterruptedException e) {
@@ -32,11 +32,11 @@ public class Main {
         String finalistas="Hilos finalistas:\n";
 
             int max=0;
-            for (Hilo h : listaHilos){
+            for (Hilotal h : listaHilotals){
                 if(h.contador>max){
                     max=h.contador;}
             }
-        for (Hilo h : listaHilos)
+        for (Hilotal h : listaHilotals)
             if(h.contador == max){
                 finalistas+= "Soy el hilo " + h.numero + " y he dormido " + h.contador + " veces\n";
             }
@@ -50,15 +50,15 @@ public class Main {
 
         int max=0;
         int subcamp=0;
-        for (Hilo h : listaHilos){
+        for (Hilotal h : listaHilotals){
             if(h.contador>max){
                 max=h.contador;}
         }
-        for (Hilo h : listaHilos){
+        for (Hilotal h : listaHilotals){
             if(h.contador>subcamp && h.contador<max){
                 subcamp=h.contador;}
         }
-        for (Hilo h : listaHilos)
+        for (Hilotal h : listaHilotals)
             if(h.contador == subcamp){
                 subcampeones+="Soy el hilo " + h.numero + " y he dormido " + h.contador + " veces\n";
             }

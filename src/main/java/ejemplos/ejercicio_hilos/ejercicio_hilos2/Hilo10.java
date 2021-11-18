@@ -1,8 +1,8 @@
-package ejemplos.ejercicio_hilos2;
+package ejemplos.ejercicio_hilos.ejercicio_hilos2;
 
 import java.util.Random;
 
-public class Hilo extends Thread {
+public class Hilo10 extends Thread {
 
     Random r = new Random();
     Boolean bool = false;
@@ -12,7 +12,7 @@ public class Hilo extends Thread {
     public long tiempoFinalizacion;
 
 
-    public Hilo(int numero){
+    public Hilo10(int numero){
         this.numero = numero;
     }
 
@@ -29,7 +29,7 @@ public class Hilo extends Thread {
              }
         }
 
-        Main.listaHilos.add(this);
+        //finalistas.listaHilos.add(this);
         System.out.println("Soy el hilo " + numero + " y he dormido " + contador + " veces");
 
     }

@@ -16,7 +16,7 @@ public class Hilo extends Thread {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("Soy el hilo " + nombre + "y me he despertado.");
+        System.out.println("Soy el hilo " + nombre + " y me he despertado.");
 
     }
 }
