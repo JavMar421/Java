@@ -1,7 +1,8 @@
+package ejemplos;
 
 import java.util.ArrayList;
 
-public class main {
+public class main_cajero {
 
     static ArrayList<cliente> clilistaOrdenada = new ArrayList<>() {
     };

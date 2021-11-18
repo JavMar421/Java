@@ -1,3 +1,5 @@
+package ejemplos;
+
 import java.util.Random;
 
 public class cliente extends Thread {
@@ -31,7 +33,7 @@ public class cliente extends Thread {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    main.clilistaOrdenada.add(this);
+    main_cajero.clilistaOrdenada.add(this);
     }
 
     }
