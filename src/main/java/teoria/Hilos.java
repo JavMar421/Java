@@ -2,7 +2,7 @@ package teoria;
 
 
 public class Hilos {
-    public static void main(String args[]) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException {
         //crear 100 hilos
         for (int i = 0; i < 10; i++) {
             Hilo h = new Hilo(i);
