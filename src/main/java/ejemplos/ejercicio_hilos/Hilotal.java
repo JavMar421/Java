@@ -1,5 +1,6 @@
 package ejemplos.ejercicio_hilos;
 
+
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -40,7 +41,7 @@ public class Hilotal extends Thread {
             }
         }
 
-        finalistas.listaHilos.add(this);
+        //finalistas.listaHilos.add(this);
         System.out.println("Soy el hilo " + numero + " y he dormido " + contador + " veces");
 
     }

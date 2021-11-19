@@ -1,6 +1,5 @@
 package teoria;
 
-import ejemplos.ejemplo_hilos.Main;
 
 public class Hilos {
     public static void main(String args[]) throws InterruptedException {
@@ -24,7 +23,7 @@ class Hilo extends Thread {
     public void run() {
         System.out.println("Soy el hilo " + num + " y me voy a dormir.");
         try {
-            int num=Main.getRandomTimeInMills();
+            //int num=Hilos.getRandomTimeInMills();
             Thread.sleep(num);
         } catch (InterruptedException e) {
             e.printStackTrace();

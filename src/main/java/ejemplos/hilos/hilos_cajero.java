@@ -1,9 +1,9 @@
-package ejemplos.ejercicio_hilos;
+package ejemplos.hilos;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-public class ejer_hilos_cajero {
+class ejer_hilos_cajero {
 
     static ArrayList<cliente> clilistaOrdenada = new ArrayList<>() {
     };
