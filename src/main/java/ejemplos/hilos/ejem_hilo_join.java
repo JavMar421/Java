@@ -13,9 +13,9 @@ import java.util.Random;
 
             //se puede quitar el try catch poniendo el throw InterruptedException
                 h1.start();
+                h2.start();
                 //join sirve para ordenar entradas de hilos
                 h1.join();
-                h2.start();
                 h2.join();
 
 
