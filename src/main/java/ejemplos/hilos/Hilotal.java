@@ -1,4 +1,4 @@
-package ejemplos.ejercicio_hilos;
+package ejemplos.hilos;
 
 
 import java.util.ArrayList;
