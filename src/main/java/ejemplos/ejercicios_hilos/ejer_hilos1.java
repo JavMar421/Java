@@ -21,7 +21,7 @@ class Main {
         // cada hilo dice por pantalla lo que ha dormido
         for (Hilo h : listaHilos) {
             try {
-                //join
+                //join para ordenar hilos
                 h.join();
             } catch (InterruptedException e) {
                 e.printStackTrace();

@@ -1,24 +1,23 @@
 package ejemplos.hilos;
 import java.util.Random;
 
-    class Hilos1 {
+    class ejem_hilo_join {
 
-        public static void main(String[] args) {
+        public static void main(String[] args) throws InterruptedException {
             System.out.println("Comenzamos a las " + System.currentTimeMillis());
 
-            Hilo1 h1 = new Hilo1("Hilo 1");
-            Hilo1 h2 = new Hilo1("Hilo 2");
+            HilosJoin h1 = new HilosJoin("Hilo 1");
+            HilosJoin h2 = new HilosJoin("Hilo 2");
 
 
 
-            try {
+            //se puede quitar el try catch poniendo el throw InterruptedException
                 h1.start();
+                //join sirve para ordenar entradas de hilos
                 h1.join();
                 h2.start();
                 h2.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+
 
 
             System.out.println("Terminamos a las " + System.currentTimeMillis());
@@ -31,11 +30,11 @@ import java.util.Random;
 
     }
 
-class Hilo1 extends Thread {
+class HilosJoin extends Thread {
 
     public String nombre;
 
-    public Hilo1(String nombre){
+    public HilosJoin(String nombre){
         this.nombre = nombre;
     }
 
@@ -43,11 +42,11 @@ class Hilo1 extends Thread {
     public void run() {
         System.out.println("Soy el hilo " + nombre + " y me voy a dormir.");
         try {
-            Thread.sleep(Hilos1.getRandomTimeInMills());
+            Thread.sleep(ejem_hilo_join.getRandomTimeInMills());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("Soy el hilo " + nombre + "y me he despertado.");
+        System.out.println("Soy el hilo " + nombre + " y me he despertado.");
 
     }
 }
