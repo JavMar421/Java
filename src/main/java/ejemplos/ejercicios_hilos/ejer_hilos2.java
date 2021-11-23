@@ -1,20 +1,20 @@
-package ejemplos.hilos;
+package ejemplos.ejercicios_hilos;
 import java.util.ArrayList;
 import java.util.Random;
 
-class hilos_finalistas {
+class ejer_hilos2 {
     static ArrayList<hilo_f> listaHilos = new ArrayList<>();
 
     public static void main(String[] args) {
 
         ArrayList<hilo_f> listaHilos = new ArrayList<>();
-
-        for (int i = 0; i < 100; i++){
+        //Crear Hilos
+        for (int i = 0; i < 10; i++){
             hilo_f h = new hilo_f(i);
             listaHilos.add(h);
             h.start();
         }
-
+        //soy hilo tal y he dormido cual...
         for (hilo_f h : listaHilos) {
             try {
                 h.join();
@@ -29,6 +29,7 @@ class hilos_finalistas {
         String finalistas="Hilos finalistas:\n";
 
         int max=0;
+        //mostrar hilo con contador mayor
         for (hilo_f h : listaHilos){
             if(h.contador>max){
                 max=h.contador;}
@@ -47,6 +48,7 @@ class hilos_finalistas {
 
         int max=0;
         int subcamp=0;
+        //mostrar hilo con contador mayor-1 para semifinalista
         for (hilo_f h : listaHilos){
             if(h.contador>max){
                 max=h.contador;}
@@ -84,15 +86,17 @@ class hilo_f extends Thread {
         long comienzo = System.currentTimeMillis();
         while (!bool){
             try {
+                //duermen 1 segundo +50% otro segundo etc...
                 Thread.sleep(1000);
                 bool = r.nextBoolean();
+                //veces dormido
                 contador++;
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
 
-        hilos_finalistas.listaHilos.add(this);
+        ejer_hilos2.listaHilos.add(this);
         System.out.println("Soy el hilo " + numero + " y he dormido " + contador + " veces");
 
     }
