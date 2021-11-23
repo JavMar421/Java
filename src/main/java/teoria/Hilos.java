@@ -15,28 +15,29 @@ public class Hilos {
 }
 class Hilo extends Thread {
 
+    public Integer namenum = 0;
     public Integer num;
-
-    public Hilo(Integer num){
-        this.num = num;
+    public Hilo(Integer namenum){
+        this.namenum = namenum;
     }
 
     @Override
     public void run() {
-        System.out.println("Soy el hilo " + num + " y me voy a dormir.");
+        System.out.println("Soy el hilo " + namenum + " y me voy a dormir.");
         try {
 
             Random r = new Random();
-            num=r.nextInt(3000);
+            num =r.nextInt(3000);
             //Sleep bloquea al hilo
             Thread.sleep(num);
             //Tambien existe wait :)
-            wait(100);
+            //wait(100);
 
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("Soy el hilo " + num + " he dormido "+num+" milis y me he despertado.");
+
+        System.out.println("Soy el hilo " + namenum + " he dormido "+ num +" milis y me he despertado.");
 
     }
 }
