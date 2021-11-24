@@ -78,11 +78,12 @@ class cliente extends Thread {
     }
 
 }
-/*
+/* *
 * Synchronized: mete un hilo solo cuando no hay nadie usando el override
-* Atomic Variables
-* Locks
-* Semáforos
+* Atomic Variables: variables que no pueden tener mismo valor solo el inicializado
+* Locks: cerrado el recorrido hasta que unlock
+* Semáforos: se especifica los que deja pasar y cuando tal no entran mas hasta que añadas más, (se pueden ordenar por entrada)
 *
-* tryLock - thyAcquireURL
- * */
+* tryLock: intenta acceder al lock y si no puede da boolean False
+* tryAcuaire
+* */

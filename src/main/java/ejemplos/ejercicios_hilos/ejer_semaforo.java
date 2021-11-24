@@ -1,4 +1,4 @@
-package ejemplos;
+package ejemplos.ejercicios_hilos;
 
 import java.util.Random;
 import java.util.concurrent.Semaphore;
@@ -6,9 +6,9 @@ import java.util.concurrent.Semaphore;
 //Main
 class main {
 
-    public main(String[] args){
+    public static void main(String[] args) {
         for (int i = 0; i < 10; i++){
-            Luchador l = new Luchador("ejemplos.Luchador " + i);
+            Luchador l = new Luchador("Luchador " + i);
             l.start();
         }
     }
