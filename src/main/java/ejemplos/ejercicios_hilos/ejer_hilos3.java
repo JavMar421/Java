@@ -1,4 +1,4 @@
-package ejemplos.hilos;
+package ejemplos.ejercicios_hilos;
 
 import java.util.ArrayList;
 import java.util.Random;

@@ -16,6 +16,7 @@ class Main {
             Hilo h = new Hilo(i);
             //start
             h.start();
+
            listaHilos.add(h);
         }
         // cada hilo dice por pantalla lo que ha dormido
