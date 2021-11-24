@@ -3,7 +3,7 @@ package ejemplos.ejercicios_hilos;
 import java.util.ArrayList;
 import java.util.Random;
 
-class ejer_hilos_cajero {
+class main {
 
     static ArrayList<cliente> clilistaOrdenada = new ArrayList<>() {
     };
@@ -74,7 +74,15 @@ class cliente extends Thread {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        ejer_hilos_cajero.clilistaOrdenada.add(this);
+        main.clilistaOrdenada.add(this);
     }
 
 }
+/*
+* Synchronized: mete un hilo solo cuando no hay nadie usando el override
+* Atomic Variables
+* Locks
+* Semáforos
+*
+* tryLock - thyAcquireURL
+ * */
