@@ -4,7 +4,7 @@ import java.util.Random;
 import java.util.concurrent.Semaphore;
 
 //Main
-class main {
+class ejemplo_semaforo {
 
     public static void main(String[] args) {
         for (int i = 0; i < 10; i++){
@@ -31,14 +31,17 @@ class Luchador extends Thread {
 class Cuadrilatero {
     static String vencedor = null;
     private static final int num = 1;
+    //el semaforo(tickets,ordenacion)
     static Semaphore semaphore = new Semaphore(num, false);
 
     static void AddParticipante(Luchador luchador) {
         Luchador luchador1;
         try {
+            //pide un ticket total-1
             semaphore.acquire(1);
             luchador1 = luchador;
             lucha(luchador1);
+            //incrementa en x el total de tickets
             semaphore.release(1);
         } catch (InterruptedException e) {
             e.printStackTrace();
