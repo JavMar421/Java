@@ -1,0 +1,2435 @@
+
+EJERCICIO AMBULANCIA
+///////////////////////
+
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class Main {
+    static AtomicBoolean ganador=new AtomicBoolean(false);
+
+    public static void main(String[] args){
+
+        ReentrantLock lockAmbulancia = new ReentrantLock();
+
+        Corredor equipo1 = new Corredor("Camboya",1,lockAmbulancia);
+        Corredor equipo2 = new Corredor("Tailandia",1,lockAmbulancia);
+        Corredor equipo3 = new Corredor("Italia",1,lockAmbulancia);
+        Corredor equipo4 = new Corredor("Rusia",1,lockAmbulancia);
+        Corredor equipo5 = new Corredor("Suecia",1,lockAmbulancia);
+        Corredor equipo6 = new Corredor("CostaRica",1,lockAmbulancia);
+        Corredor equipo7 = new Corredor("Mexico",1,lockAmbulancia);
+        Corredor equipo8 = new Corredor("Alemania",1,lockAmbulancia);
+        Corredor equipo9 = new Corredor("China",1,lockAmbulancia);
+
+        equipo1.start();
+        equipo2.start();
+        equipo3.start();
+        equipo4.start();
+        equipo5.start();
+        equipo6.start();
+        equipo7.start();
+        equipo8.start();
+        equipo9.start();
+    }
+
+}
+
+
+class Ambulancia extends Thread{
+
+    Corredor corredor;
+    ReentrantLock lock = new ReentrantLock();
+
+    Ambulancia(Corredor corredor){
+        this.corredor=corredor;
+    }
+
+    @Override
+    public void run(){
+        atenderAlCorredor();
+    }
+
+    public void atenderAlCorredor()  {
+        System.out.println("La ambulancia empieza a atender al corredor " + corredor.numCorredor + " de " + corredor.pais+" en el milisegundo "+System.currentTimeMillis());
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("El corredor " + corredor.numCorredor + " de " + corredor.pais + " está curado y pasa el relevo en el milisegundo "+System.currentTimeMillis());
+    }
+}
+
+
+
+class Corredor extends Thread{
+    ReentrantLock lock;
+    String pais;
+    int numCorredor;
+
+    Corredor(String pais,int numCorredor,ReentrantLock lock){
+        this.pais=pais;
+        this.numCorredor=numCorredor;
+        this.lock=lock;
+    }
+
+    public int getNumCorredor(){
+        return numCorredor;
+    }
+
+    @Override
+    public void run(){
+        System.out.println("Comienza la carrera el corredor "+numCorredor+" de "+pais);
+        long cuanto=((new Random().nextInt(5))+1)*1000;
+        try {
+            Thread.sleep(cuanto); //La carrera
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        int rand=new Random().nextInt(10);
+        if(rand==0){ //Si se ha tropezado con el obstáculo; puede que le atienda la ambulancia O que sea descalificado
+
+            if(lock.tryLock()) { //Si se puede bloquear el lock, lo hace. Y dentro está la ambulancia. Así, mientras la use uno, no la puede usar otro
+                Ambulancia ambulancia = new Ambulancia(this);
+                ambulancia.start();
+                try {
+                    ambulancia.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("El corredor " + getNumCorredor() + " de " + pais + " acaba de ser atendido en el milisegundo " + System.currentTimeMillis());
+                lock.unlock(); //Cuando está curado, el corredor desbloquea el lock
+            }
+            else {  //Si no, el país es descalificado (el hilo no hace nada más)
+                System.out.println("El país " + this.pais + " ha sido descalificado de la carrera porque la ambulancia está ocupada.");
+                return;
+            }
+        }
+        //Si ha superado el obstáculo o si le atendió la ambulancia y ha vuelto a la carrera:
+        if(numCorredor==4) { //Si es el último corredor de ese equipo
+            if (Main.ganador.compareAndSet(false, true))
+                System.out.println("El corredor " + getNumCorredor() + " de " + pais + " ha GANADO la carrera!!!");
+            else
+                System.out.println("El corredor " + getNumCorredor() + " de " + pais + " ha acabado la carrera y ha perdido.");
+        }
+        else { //Si no es el último
+            System.out.println("El corredor " + numCorredor + " de " + pais + " pasa el relevo.");
+            Corredor c = new Corredor(pais, getNumCorredor() + 1, lock);
+            c.start();
+        }
+    }
+}
+
+////////////////////////////////////////
+REPETIR HILOS Y VER CUAL SE REPITE MAS VECES
+///////////////////////////////////////
+
+
+import java.util.ArrayList;
+
+
+
+public class Main {
+
+    static ArrayList<Hilos> resul = new ArrayList<>();
+
+    public static void main(String[] args) {
+
+
+
+        for (int i = 1; i < 100; i++) {
+            Hilos h1 = new Hilos("Hilos" + i);
+            h1.start();
+            resul.add(h1);
+
+        }
+
+
+        for (Hilos h1 : resul) {
+            try {
+                h1.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        }
+        System.out.println(escribirFinalistas());
+        System.out.println(escribirSubCampeones());
+    }
+
+
+
+
+
+    public static String escribirFinalistas()  {
+        int max=0;
+        String finals="Hilos finalistas\n";
+        for(Hilos hilo : resul){
+            if(hilo.contador>max)
+                max=hilo.contador;
+        }
+        for(Hilos hilo : resul){
+            if(hilo.contador==max)
+                finals+= hilo.nombre + " se ha ejecutado " + hilo.contador + " veces\n";
+        }
+
+
+        return finals;
+
+    }
+    public static String escribirSubCampeones()  {
+        int maximo1=0, maximo2=0;
+        String subcampeon="Hilos Subcampeones\n";
+        for(Hilos hilo : resul){
+            if(hilo.contador>maximo1)
+                maximo1=hilo.contador;
+        }
+        for(Hilos hilo : resul){
+            if(hilo.contador<maximo1 && hilo.contador>maximo2)
+                maximo2=hilo.contador;
+        }
+        for(Hilos hilo : resul){
+            if(hilo.contador==maximo2)
+                subcampeon+= hilo.nombre + " se ha ejecutado " + hilo.contador + " veces\n";
+        }
+
+        return subcampeon;
+
+    }
+}
+
+
+import java.util.Random;
+
+class Hilos extends Thread {
+    public String nombre;
+
+    int contador;
+
+
+    public Hilos(String nombre){
+        this.nombre = nombre;
+    }
+
+    @Override
+    public void run() {
+        do {
+
+
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            contador++;
+        }while(getRandomSleep()==1);
+        System.out.println("Soy el hilo nº " + nombre + " y me he repetido: " + contador + " veces");
+
+
+    }
+    public static Integer getRandomSleep() {
+        Random r = new Random();
+        return (r.nextInt(2));
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+
+
+EJEMPLO DE SEMAFOROS BASICO
+
+////////////////////////////
+
+
+import java.util.Random;
+import java.util.concurrent.Semaphore;
+
+public class Main {
+
+    // Imagina que tenemos una piscina con 4 personas de aforo.
+    // Nuestros bañistas son hilos
+    // Un bañista se queda un rato en la piscina (Tiempo aleatorio)
+    // Cuando uno se va, entra otro
+
+
+    public static void main(String[] args) {
+        for (int i = 0; i<10; i++){
+            Banista b = new Banista(String.valueOf(i));
+            b.start();
+        }
+    }
+}
+
+class Piscina {
+
+    private static final int NUM_ACCESO_SIMULTANEOS = 4;
+    static Semaphore semaphore = new Semaphore(NUM_ACCESO_SIMULTANEOS, true);
+
+    static void solicitadAcceso(Banista banista){
+        System.out.println("El " + banista.nombre + " quiere entrar");
+        try {
+            semaphore.acquire(2);
+            banarse(banista);
+            semaphore.release(2);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void banarse(Banista banista){
+        System.out.println("Comienza el baño el banista " + banista.nombre);
+        try {
+            Thread.sleep(((new Random().nextInt(4) ) + 1) * 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        banista.sucio = false;
+        System.out.println("Finaliza el baño el banista " + banista.nombre);
+
+    }
+}
+
+
+class Banista extends Thread {
+
+    boolean sucio = true;
+    String nombre;
+    public Banista(String nombre){
+        this.nombre = nombre;
+    }
+
+    @Override
+    public void run() {
+        Piscina.solicitadAcceso(this);
+        System.out.println("El "+ nombre + " ya se ha bañado y está Sucio = " + sucio);
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
+EJEMPLO DE LOCK CON TRYLOCK
+
+////////////////////////////
+
+
+
+import java.util.ArrayList;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class Main {
+
+    static ReentrantLock lockBanio1 = new ReentrantLock();
+    static ReentrantLock lockBanio2 = new ReentrantLock();
+
+    static ArrayList<Jugador> listaJugadores = new ArrayList<>();
+
+    public static void main(String[] args) {
+        for (int i = 0; i < 6; i++){
+            listaJugadores.add(new Jugador("nombre = " + i + " "));
+        }
+
+        for (int i = 0; i < listaJugadores.size(); i++){
+            listaJugadores.get(i).start();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+}
+
+
+class Jugador extends Thread {
+
+    private String nombre;
+    private boolean pisEncima = false;
+
+    Jugador(String nombre){
+        this.nombre = nombre;
+    }
+
+    @Override
+    public void run() {
+
+        if (Main.lockBanio1.tryLock()) {
+            System.out.println("El jugador " + nombre + "ha entrado al baño 1");
+            hacerPisEnBanio();
+            System.out.println("El jugador " + nombre + "ha terminado con el baño 1");
+            Main.lockBanio1.unlock();
+        } else {
+            if (Main.lockBanio2.tryLock()) {
+                System.out.println("El jugador " + nombre + "ha entrado al baño 2");
+                hacerPisEnBanio();
+                System.out.println("El jugador " + nombre + "ha terminado con el baño 2");
+                Main.lockBanio2.unlock();
+            } else {
+                System.out.println("El jugador " + nombre + "no ha encontrado baño");
+                hacerPisEncima();
+                System.out.println("El jugador " + nombre + "se ha hecho pis encima");
+            }
+        }
+    }
+
+    public void hacerPisEnBanio(){
+        try {
+            Thread.sleep(3000);
+            pisEncima = false;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void hacerPisEncima(){
+        try {
+            Thread.sleep(3000);
+            pisEncima = true;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+EJERCICIO DE LUCHADORES (entran 2 hilos con semaforo y cuando hay un hueco libre, entra otro al ring)
+
+////////////////////////////////////////////////////////////////
+
+
+import java.util.Random;
+import java.util.concurrent.Semaphore;
+
+public class Main {
+
+
+        public static void main(String[] args) {
+            for (int i = 0; i < 10; i++){
+                Luchador t = new Luchador();
+                t.setName("Luchador " + i);
+                t.start();
+            }
+        }
+    }
+
+    class Luchador extends Thread {
+
+
+        @Override
+        public void run() {
+                Cuadrilatero.AddParticipante(this);
+        }
+    }
+
+ class Cuadrilatero {
+
+    private static final int NUM_ACCESO_SIMULTANEOS = 2;
+    static Semaphore semaphore = new Semaphore(NUM_ACCESO_SIMULTANEOS,true);
+    static Luchador luchador1 = null;
+    static Luchador luchador2 = null;
+
+
+    static void AddParticipante(Luchador luchador){
+
+        try {
+            semaphore.acquire();
+
+            if(luchador1==null) {
+                luchador1 = luchador;
+
+            }else
+                luchador2=luchador;
+            if(luchador1!=null && luchador2!=null) {
+                System.out.println("Comienza la pelea de: " + luchador1.getName() + " y " + luchador2.getName());
+                luchar();
+                semaphore.release();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void luchar() {
+
+        boolean pelea = new Random().nextBoolean();
+        if (pelea) {
+            System.out.println("el " + luchador1.getName() + " gana");
+            luchador2 = null;
+        } else {
+            System.out.println("el " + luchador2.getName() + " gana");
+            luchador1 = null;
+
+        }
+    }
+
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+EJERCICIO BATTLE ROYALE
+
+/////////////////////////
+
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class Main {
+    static int mayor = 0;
+    static String gana="";
+
+    public static void main(String[] args)  {
+
+        ArrayList<Hilos> l = new ArrayList<>();
+        for (int i = 1; i <= 15; i++) {
+            Hilos hilo = new Hilos(false, 0);
+            hilo.setName("Jugador " + i);
+            hilo.start();
+            l.add(hilo);
+
+        }
+
+        for (Hilos h : l) {
+            try {
+                h.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        for (Hilos h : l) {
+            if (mayor < h.puntuacion){
+                mayor = h.puntuacion;
+               gana = "El " + h.getName() + " ha ganado con " + mayor + " puntos\n";
+            }
+        }
+        System.out.println();
+        System.out.println();
+        System.out.println(gana);
+    }
+}
+
+class Hilos extends Thread{
+
+    boolean bonus;
+    int puntuacion;
+    public Hilos(boolean bonus, int puntuacion){
+        this.bonus = bonus;
+        this.puntuacion = puntuacion;
+    }
+    @Override
+    public void run() {
+        Batalla.AddParticipante(this);
+    }
+}
+
+class Batalla {
+
+    static AtomicInteger entero = new AtomicInteger(0);
+    private static final Random r = new Random();
+    static AtomicBoolean primero = new AtomicBoolean(false);
+    private static final int numero = 10;
+    private static final int mueren = 5;
+    static Semaphore s = new Semaphore(numero);
+
+    public static void AddParticipante(Hilos hilo) {
+        try {
+            s.acquire();
+            Thread.sleep(r.nextInt(5000) + 1000);
+            entero.getAndIncrement();
+            if (!primero.compareAndExchange(false, true)) {
+                hilo.bonus = true;
+            }
+
+            if (hilo.bonus) {
+                System.out.println("El " + hilo.getName() +  " tiene un bonus \n");
+            }
+
+            if (entero.get() <= mueren ) {
+                System.out.println("El " + hilo.getName() + " sigue vivo\n");
+                PuntacionFinal(hilo);
+            }
+
+            if (entero.get() == mueren) {
+                System.out.println("Mueren 5 Jugadores \n");
+            }
+
+            if (entero.get() > mueren && entero.get() <= numero) {
+                System.out.println(hilo.getName() + " Ha muerto \n");
+            }
+
+            if (entero.get() == 10) {
+                System.out.println("Entran 5 al combate \n");
+                s.release(5);
+            }
+
+            if (entero.get() > 10) {
+                System.out.println("El " + hilo.getName() + " entra al combate \n");
+                PuntacionFinal(hilo);
+            }
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public  static void PuntacionFinal(Hilos hilo) throws InterruptedException {
+        int min = 1;
+        int max = 10;
+        Random random = new Random();
+        hilo.puntuacion = random.nextInt(max) + min;
+        if (hilo.bonus){
+            hilo.puntuacion = hilo.puntuacion * 2;
+        }
+        System.out.println("La puntacion de " + hilo.getName() + " es " + hilo.puntuacion + "\n");
+
+    }
+}
+
+class Ganador {
+    static int mayor = 0;
+    public synchronized static void campeon (Hilos hilo) throws InterruptedException {
+        if (mayor < hilo.puntuacion){
+            mayor = hilo.puntuacion;
+            System.out.println("El " + hilo.getName() + " va ganando con " + mayor+ " puntos\n");
+        }
+    }
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+METER HILOS EN UNA LISTA Y SACARLOS ORDENADOS
+
+//////////////////////////////////////////////
+
+
+
+
+        ArrayList<Hilos> l = new ArrayList<>();
+        for (int i = 1; i <= 15; i++) {
+            Hilos hilo = new Hilos(false, 0);
+            hilo.setName("Jugador " + i);
+            hilo.start();
+            l.add(hilo);
+
+        }
+
+        for (Hilos h : l) {
+            try {
+                h.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        for (Hilos h : l) {
+            if (mayor < h.puntuacion){
+                mayor = h.puntuacion;
+               gana = "El " + h.getName() + " ha ganado con " + mayor + " puntos\n";
+            }
+        }
+        System.out.println();
+        System.out.println();
+        System.out.println(gana);
+    }
+}
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+EJERCICIO JOINS EJEMPLO
+
+/////////////////////////////
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
+import java.util.ArrayList;
+
+public class Main {
+
+    public static int dineroSacado = 0;
+
+
+    public static void main(String[] args) {
+        try {
+            ImmutablePair<String, Long> resultado1 = usandoJoinsIntercalados();
+            ImmutablePair<String, Long> resultado2 = usandoJoinsAlFin();
+            ImmutablePair<String, Long> resultado3 =usandoJoinsEnLista();
+            System.out.println(resultado1.getKey() + " ha tardado " + resultado1.getValue() + " mientras que " + resultado2.getKey() + " ha tardado " + resultado2.getValue());
+            System.out.println(resultado1.getKey() + " ha tardado " + resultado1.getValue() + " mientras que " + resultado3.getKey() + " ha tardado " + resultado3.getValue());
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * Este ejemplo utiliza joins al finalizar todos los hilos.
+     * @return el tiempo que ha tardado en realizar la operación
+     */
+    private static ImmutablePair<String, Long> usandoJoinsIntercalados() throws InterruptedException {
+        reiniciar();
+        System.out.println("======================================================");
+
+        long inicio = System.currentTimeMillis();
+        Cajero t1 = new Cajero(25, 1);
+        t1.start();
+        t1.join();
+        Cajero t2 = new Cajero(25,2);
+        t2.start();
+        t2.join();
+        Cajero t3 = new Cajero(25, 3);
+        t3.start();
+        t3.join();
+        Cajero t4 = new Cajero(25, 4);
+        t4.start();
+        t4.join();
+        Cajero t5 = new Cajero(25, 5);
+        t5.start();
+        t5.join();
+        long fin = System.currentTimeMillis();
+
+        System.out.println("He sacado en total: " + dineroSacado + "€");
+        BaseDatosSimulada.imprimirSaldo();
+
+        System.out.println("======================================================");
+
+        return new ImmutablePair<>("usandoJoinsIntercalados", fin - inicio);
+    }
+
+    /**
+     * Este ejemplo utiliza joins entre cada una de los hilos.
+     * @return el tiempo que ha tardado en realizar la operación
+     */
+    private static ImmutablePair<String, Long> usandoJoinsAlFin() throws InterruptedException {
+        reiniciar();
+        System.out.println("======================================================");
+
+        long inicio = System.currentTimeMillis();
+        Cajero t1 = new Cajero(25, 1);
+        t1.start();
+        Cajero t2 = new Cajero(25,2);
+        t2.start();
+        Cajero t3 = new Cajero(25, 3);
+        t3.start();
+        Cajero t4 = new Cajero(25, 4);
+        t4.start();
+
+        Cajero t5 = new Cajero(25, 5);
+        t5.start();
+
+        t1.join();
+        t2.join();
+        t3.join();
+        t4.join();
+        t5.join();
+        long fin = System.currentTimeMillis();
+
+        System.out.println("He sacado en total: " + dineroSacado + "€");
+        BaseDatosSimulada.imprimirSaldo();
+        System.out.println("======================================================");
+
+        return new ImmutablePair<>("usandoJoinsIntercalados", fin - inicio);
+    }
+
+
+    /**
+     * Este ejemplo utiliza joins entre cada una de los hilos.
+     * @return el tiempo que ha tardado en realizar la operación
+     */
+    private static ImmutablePair<String, Long> usandoJoinsEnLista() throws InterruptedException {
+        reiniciar();
+        System.out.println("======================================================");
+
+        long inicio = System.currentTimeMillis();
+
+        ArrayList<Thread> listaHilos = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            listaHilos.add(new Cajero(25, i));
+            listaHilos.get(i).start();
+        }
+
+        for (Thread t : listaHilos) {
+            t.join();
+        }
+
+        long fin = System.currentTimeMillis();
+
+        System.out.println("He sacado en total: " + dineroSacado + "€");
+        BaseDatosSimulada.imprimirSaldo();
+        System.out.println("======================================================");
+
+        return new ImmutablePair<>("usandoJoinsIntercalados", fin - inicio);
+    }
+
+    private static void reiniciar() {
+        dineroSacado = 0;
+        BaseDatosSimulada.reiniciar();
+    }
+}
+
+
+public class Cajero extends Thread {
+
+    private final int dineroASacar;
+    private final int numeroTransaccion;
+
+    public Cajero(int dineroASacar, int numeroTransaccion){
+        this.dineroASacar = dineroASacar;
+        this.numeroTransaccion = numeroTransaccion;
+    }
+
+    @Override
+    public void run() {
+        try {
+            System.out.println("Simulamos que sacamos " + dineroASacar + "€ en la operación " + numeroTransaccion);
+            Main.dineroSacado += BaseDatosSimulada.sacarDinero(dineroASacar);
+            System.out.println("Transacción número "+ numeroTransaccion + " finalizada.");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+public class BaseDatosSimulada {
+
+    private static int saldo = 100;
+
+    private static int obtenerSaldo() throws InterruptedException {
+        long sleepingTime = (long) (Math.random()*1000);
+        Thread.sleep(sleepingTime);
+        return saldo;
+    }
+
+    private static void actualizarSaldo(int saldo) throws InterruptedException {
+        long sleepingTime = (long) (Math.random()*1000);
+        Thread.sleep(sleepingTime);
+        BaseDatosSimulada.saldo = saldo;
+    }
+
+    /**
+     *
+     * @param cantidad representa la cantidad de € que le gustaría sacar
+     * @return la cantidad de € que ha conseguido sacar
+     * @throws InterruptedException
+     */
+    public static int sacarDinero(int cantidad) throws InterruptedException {
+        int saldo = obtenerSaldo();
+        if (saldo - cantidad >= 0) {
+            actualizarSaldo(saldo - cantidad);
+            System.out.println("Se ha entregado al cliente " + cantidad + "€");
+            return cantidad;
+        } else {
+            System.out.println("No había cantidad de € suficientes");
+            return 0;
+        }
+    }
+
+    public static void imprimirSaldo(){
+        System.out.println("En la base de datos actualmente tenemos  " + saldo + "€");
+    }
+
+    public static void reiniciar(){
+        System.out.println("En la base de datos comenzamos teniendo " + 100 + "€");
+        saldo = 100;
+    }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+EJERCICIO EJEMPLO SYNCRONIZED
+
+
+////////////////////////////////
+
+
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
+import java.util.ArrayList;
+
+public class Main {
+
+    public static int dineroSacado = 0;
+
+
+    public static void main(String[] args) {
+        try {
+            ImmutablePair<String, Long> resultado1 = sinJoin();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static ImmutablePair<String, Long> sinJoin() throws InterruptedException {
+        reiniciar();
+        System.out.println("======================================================");
+
+        long inicio = System.currentTimeMillis();
+        Cajero t1 = new Cajero(25, 1);
+        t1.start();
+        Cajero t2 = new Cajero(25,2);
+        t2.start();
+        Cajero t3 = new Cajero(25, 3);
+        t3.start();
+        Cajero t4 = new Cajero(25, 4);
+        t4.start();
+        Cajero t5 = new Cajero(25, 5);
+        t5.start();
+        long fin = System.currentTimeMillis();
+
+        System.out.println("He sacado en total: " + dineroSacado + "€");
+        BaseDatosSimulada.imprimirSaldo();
+
+        System.out.println("======================================================");
+
+        return new ImmutablePair<>("usandoJoinsIntercalados", fin - inicio);
+    }
+
+
+    private static void reiniciar() {
+        dineroSacado = 0;
+        BaseDatosSimulada.reiniciar();
+    }
+}
+
+
+public class Cajero extends Thread {
+
+    private final int dineroASacar;
+    private final int numeroTransaccion;
+
+    public Cajero(int dineroASacar, int numeroTransaccion){
+        this.dineroASacar = dineroASacar;
+        this.numeroTransaccion = numeroTransaccion;
+    }
+
+    @Override
+    public void run() {
+        try {
+            System.out.println("Simulamos que sacamos " + dineroASacar + "€ en la operación " + numeroTransaccion);
+            Main.dineroSacado += BaseDatosSimulada.sacarDinero(dineroASacar);
+            System.out.println("Transacción número "+ numeroTransaccion + " finalizada.");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+
+public class BaseDatosSimulada {
+
+    private static int saldo = 100;
+
+    private static int obtenerSaldo() throws InterruptedException {
+        long sleepingTime = (long) (Math.random()*1000);
+        Thread.sleep(sleepingTime);
+        return saldo;
+    }
+
+    private static void actualizarSaldo(int saldo) throws InterruptedException {
+        long sleepingTime = (long) (Math.random()*1000);
+        Thread.sleep(sleepingTime);
+        BaseDatosSimulada.saldo = saldo;
+    }
+
+    /**
+     *
+     * @param cantidad representa la cantidad de € que le gustaría sacar
+     * @return la cantidad de € que ha conseguido sacar
+     * @throws InterruptedException
+     */
+    static boolean enUso = false;
+
+    public synchronized static int sacarDinero(int cantidad) throws InterruptedException {
+        int saldo = obtenerSaldo();
+        if (saldo - cantidad >= 0) {
+            actualizarSaldo(saldo - cantidad);
+            System.out.println("Se ha entregado al cliente " + cantidad + "€");
+            return cantidad;
+        } else {
+            System.out.println("No había cantidad de € suficientes");
+            return 0;
+        }
+
+    }
+
+    public static void imprimirSaldo(){
+        System.out.println("En la base de datos actualmente tenemos  " + saldo + "€");
+    }
+
+    public static void reiniciar(){
+        System.out.println("En la base de datos comenzamos teniendo " + 100 + "€");
+        saldo = 100;
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+EJEMPLO USO DE ATOMICOS
+
+/////////////////////////////
+
+
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+
+public class Main {
+
+
+
+    public static void main(String[] args) {
+        EjemploAtomicos a = new EjemploAtomicos();
+    }
+
+
+}
+
+
+class Persona {
+
+    String nombre;
+    String apellido;
+
+    Persona(String nombre, String apellido) {
+        this.apellido = apellido;
+        this.nombre = nombre;
+    }
+
+    @Override
+    public String toString() {
+        return "Persona{" +
+                "nombre='" + nombre + '\'' +
+                ", apellido='" + apellido + '\'' +
+                '}';
+    }
+
+}
+
+class EjemploAtomicos {
+
+    AtomicBoolean aBoolean = new AtomicBoolean(true);
+    AtomicInteger aInteger = new AtomicInteger(1);
+    AtomicLong aLong = new AtomicLong(1);
+    AtomicReference<String> bString = new AtomicReference<>("Hola");
+    AtomicReference<Persona> bPersona = new AtomicReference<>(new Persona("A", "B"));
+
+    boolean nBoolean = true;
+    int nInt = 1;
+    long nLong = 1;
+    String nString = "Hola";
+    Persona nPersona = new Persona("A", "B");
+
+
+    EjemploAtomicos(){
+        probarBoolean();
+        probarInt();
+        probarLong();
+        probarString();
+        probarPersona();
+    }
+
+    private void probarBoolean() {
+        // Mal
+        if (nBoolean) {
+            nBoolean = false;
+        }
+        // Bien
+        aBoolean.compareAndExchange(true, false);
+        System.out.println(aBoolean.get());
+    }
+
+    private void probarInt() {
+        // Mal
+        if (nInt == 1) {
+            nInt = 6;
+        }
+        // Bien
+        aInteger.compareAndExchange(1, 6);
+        System.out.println(aInteger.get());
+    }
+
+    private void probarLong() {
+        // Mal
+        if (nLong == 1) {
+            nLong = 9;
+        }
+        // Bien
+        aLong.compareAndExchange(1, 9);
+        System.out.println(aLong.get());
+    }
+
+    private void probarString() {
+        // Mal
+        if (nString.contentEquals("Hola")) {
+            nString = "Adios";
+        }
+        // Bien
+        bString.compareAndExchange("Hola", "Adios");
+        System.out.println(bString.get());
+    }
+
+    private void probarPersona() {
+        // Mal
+        if (nPersona.nombre.contentEquals("A") && nPersona.apellido.contentEquals("B")) {
+            nPersona = new Persona("C", "D");
+        }
+        // Bien
+        bPersona.compareAndExchange(new Persona("A","B"), new Persona("C","D"));
+        System.out.println(bPersona.get());
+
+    }
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+EJEMPLO DE HILOS ESPERANDO A OTROS HILOS
+
+
+//////////////////////////
+
+
+import java.util.ArrayList;
+import java.util.concurrent.Semaphore;
+
+public class Main {
+
+    static final int NUMERO_JUGADORES = 5;
+    static Integer jugadoresEnCola = 0;
+
+    public static void main(String[] args) {
+        ArrayList<Jugador> listaJugadores = new ArrayList<>();
+        Semaphore s = new Semaphore(0);
+        Integer jugadoresEnCola = 0;
+
+        for (int i = 0; i < 5; i++){
+            listaJugadores.add(new Jugador("nombre = " + i + " ", s, jugadoresEnCola));
+        }
+        for (int i = 0; i < listaJugadores.size(); i++){
+            listaJugadores.get(i).start();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+
+
+class Jugador extends Thread {
+
+    private String nombre;
+    private Semaphore s;
+    private Integer jugadoresEnCola;
+
+    Jugador(String nombre, Semaphore s, Integer jugadoresEnCola) {
+        this.nombre = nombre;
+        this.s = s;
+        this.jugadoresEnCola = jugadoresEnCola;
+    }
+
+
+    @Override
+    public void run() {
+        System.out.println("El jugador " + nombre + "está en cola para empezar");
+        Main.jugadoresEnCola++;
+        try {
+            if (Main.jugadoresEnCola == Main.NUMERO_JUGADORES)
+                s.release(Main.NUMERO_JUGADORES);
+            s.acquire();
+            System.out.println("El jugador " + nombre + "ha entrado en la partida");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
+EJEMPLO HILOS VENDEDOR
+
+///////////////////////////
+
+
+import java.util.ArrayList;
+import java.util.Random;
+
+class Main {
+    static ArrayList<Cliente> resul = new ArrayList<>();
+    public static void main(String[] args){
+        for (int i=0;i<100;i++){
+            Cliente cliente = new Cliente("Cliente" + i);
+            cliente.start();
+            resul.add(cliente);
+        }
+        for (Cliente h1 : resul) {
+            try {
+                h1.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        }
+        System.out.println("Dinero que ha ganado el vendedor "+ Vendedor.recaudacion+ "€");
+
+    }
+}
+class Cliente extends Thread {
+    public String nombre;
+    ArrayList<Item> Carrito = new ArrayList<>();
+    int contador=100;
+
+
+    public Cliente(String nombre){
+        this.nombre = nombre;
+    }
+    @Override
+    public void run() {
+        while(getRandomBuy()<=contador) {
+            Item item =new Item();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Carrito.add(item);
+            contador -= 10;
+        }
+        Vendedor.cobrar(this);
+
+
+    }
+
+    public static Integer getRandomBuy() {
+        Random r = new Random();
+        return (r.nextInt(100)+1);
+    }
+}
+class Item {
+    String producto="Item"+getRandom();
+    int precio=getRandomPrecio();
+
+    public static Integer getRandomPrecio() {
+        Random r = new Random();
+        return (r.nextInt(100)+1);
+    }
+    public static Integer getRandom() {
+        Random r = new Random();
+        return (r.nextInt());
+    }
+}
+class Vendedor {
+    static int recaudacion=0;
+    synchronized static void cobrar(Cliente cliente) {
+
+        System.out.println("Lista de la compra: "+ cliente.nombre);
+        for (Item compra: cliente.Carrito) {
+            System.out.println(compra.producto+" "+ compra.precio+ "€");
+            recaudacion+=compra.precio;
+        }
+
+    }
+
+}
+
+
+
+////////////////////////////////////////////////////////////////////////
+BATTLE ROYALE V2
+////////////////////////////////////////////////////////////////////////
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class Main {
+    static ArrayList<Jugador> jugadoresArrayList = new ArrayList<>();
+    public static void main(String[] args) {
+        int Maxpuntuacion= 0;
+        String ganador="";
+
+        for (int i = 0; i < 15; i++){
+            Jugador t = new Jugador();
+            t.setName("Luchador " + i);
+            t.start();
+            jugadoresArrayList.add(t);
+            for (Jugador j : jugadoresArrayList){
+                try {
+                    j.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            System.out.println(t.getName() + " ha sacado un " + t.getPuntacion());
+        }
+        for (Jugador j : jugadoresArrayList){
+            if (Maxpuntuacion<=j.getPuntacion()) {
+                Maxpuntuacion= j.getPuntacion();
+                ganador+=j.getName()+ " ha ganado con una puntuacion de: " + Maxpuntuacion;
+            }
+        }
+        System.out.println(ganador);
+    }
+    }
+    class Jugador extends Thread {
+        private boolean esPrimero = false;
+        private boolean esPrimeraRonda = false;
+        private boolean esCampeonPrimeraRonda = false;
+
+        private int puntacion = 0;
+        @Override
+        public void run() {
+            System.out.println("El jugador " + getName() + " esta listo para entrar en acción");
+            CampoDeBatalla.addParticipante(this);
+        }
+        public void setEsPrimero(boolean esPrimero) {
+            this.esPrimero = esPrimero;
+        }
+
+        public void setEsPrimeraRonda(boolean esPrimeraRonda) {
+            this.esPrimeraRonda = esPrimeraRonda;
+        }
+
+        public boolean isEsPrimeraRonda() {
+            return esPrimeraRonda;
+        }
+
+        public boolean isEsPrimero() {
+            return esPrimero;
+        }
+
+        public int getPuntacion() {
+            return puntacion;
+        }
+
+        public void setPuntacion(int puntacion) {
+            this.puntacion = puntacion;
+        }
+
+        public boolean isEsCampeonPrimeraRonda() {
+            return esCampeonPrimeraRonda;
+        }
+
+        public void setEsCampeonPrimeraRonda(boolean esCampeonPrimeraRonda) {
+            this.esCampeonPrimeraRonda = esCampeonPrimeraRonda;
+        }
+
+
+
+
+    }
+    class CampoDeBatalla {
+
+        private static final int NUM_ACCESO_SIMULTANEOS = 10;
+        static Semaphore semaphore = new Semaphore(NUM_ACCESO_SIMULTANEOS,false);
+        private static boolean hayPrimero = false;
+        private static int plazasEnPrimeraRonda = 10;
+        private static int campeonesPrimeraRonda = 5;
+        public static void addParticipante(Jugador jugador){
+
+            try {
+                semaphore.acquire();
+                System.out.println(jugador.getName() + " ha entrado en la batalla");
+                calcularPrimeroRonda(jugador);
+
+                Random r = new Random();
+                int tiempoDeEspera = r.nextInt(4000) + 1000;
+                System.out.println(jugador.getName() + " dormirá por " + tiempoDeEspera);
+                Thread.sleep(tiempoDeEspera);
+                calcularPrimeroEnLlegar(jugador);
+                calcularSiEsDeLos5Primeros(jugador);
+
+                calcularPuntuacion(jugador);
+                semaphore.release();
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+
+        private static synchronized void calcularSiEsDeLos5Primeros(Jugador jugador) {
+            if (campeonesPrimeraRonda > 0) {
+                campeonesPrimeraRonda--;
+                jugador.setEsCampeonPrimeraRonda(true);
+            }
+        }
+
+        private static void calcularPuntuacion(Jugador jugador) {
+            Random r = new Random();
+            int puntuacion = r.nextInt(10)+1;
+
+
+            if (jugador.isEsPrimeraRonda()) {
+                if (jugador.isEsCampeonPrimeraRonda()) {
+                    if (jugador.isEsPrimero()) {
+                        puntuacion *= 2;
+                    }
+                    jugador.setPuntacion(puntuacion);
+                }
+
+            } else {
+                jugador.setPuntacion(puntuacion);
+            }
+        }
+
+
+        private static synchronized void calcularPrimeroRonda(Jugador jugador) {
+            if (plazasEnPrimeraRonda > 0) {
+                plazasEnPrimeraRonda--;
+                jugador.setEsPrimeraRonda(true);
+            }
+        }
+
+
+        private static synchronized void calcularPrimeroEnLlegar(Jugador jugador) {
+            if (!hayPrimero) {
+                System.out.println(jugador.getName() + " es el primero y lleva el bonus");
+                jugador.setEsPrimero(true);
+                hayPrimero = true;
+            }
+        }
+
+    }
+
+//////////////////////////////////////////////////////////////////////////
+DORMIR HILOS
+//////////////////////////////////////////////////////////////////////////import java.util.ArrayList;
+import java.util.Random;
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        ArrayList<Hilo> list = new ArrayList<>();
+
+        for (int i = 1; i <= 100; i++) {
+            Hilo h1 = new Hilo("Hilo " + i);
+            h1.start();
+            list.add(h1);
+        }
+
+        for (Hilo j : list) {
+            System.out.println("Soy el " + j.nombre + " y he dormido " + j.tiempodormido);
+        }
+
+    }
+
+    public static class Hilo extends Thread {
+
+        Random r = new Random();
+        long tiempodormido = 0;
+        public String nombre;
+
+        public Hilo(String nombre) {
+            this.nombre = nombre;
+        }
+
+        @Override
+        public void run() {
+
+            try {
+                tiempodormido = r.nextInt(3000);
+                Thread.sleep(tiempodormido);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
+    }
+
+////////////////////////////////////////////////////////////////////////
+HERENCIA
+/////////////////////////////////////////////////////////////////////////
+package com.ejemplo;
+
+import java.util.ArrayList;
+
+public class Main {
+
+    public static void main(String[] args) {
+        ClasePadre clasePadre = new ClasePadre();
+        ClaseHija1 claseHija1 = new ClaseHija1();
+        ClaseHija2 claseHija2 = new ClaseHija2();
+
+        System.out.println("Ejecutando... clasePadre.mostrarPorPantalla()");
+        clasePadre.mostrarPorPantalla();
+        System.out.println("Ejecutando... claseHija1.mostrarPorPantalla()");
+        claseHija1.mostrarPorPantalla();
+        System.out.println("Ejecutando... claseHija2.mostrarPorPantalla()");
+        claseHija2.mostrarPorPantalla();
+
+        ArrayList<ClasePadre> lista = agruparEnLista(clasePadre, claseHija1, claseHija2);
+        mostrarLista(lista);
+    }
+
+    private static ArrayList<ClasePadre> agruparEnLista(ClasePadre clasePadre, ClaseHija1 claseHija1, ClaseHija2 claseHija2){
+        ArrayList<ClasePadre> lista = new ArrayList<>();
+        lista.add(clasePadre);
+        lista.add(claseHija1);
+        lista.add(claseHija2);
+        return lista;
+    }
+
+    private static void mostrarLista(ArrayList<ClasePadre> lista){
+        for (int i = 0; i < lista.size(); i++) {
+            System.out.println("En la posición" + i + " digo...");
+            lista.get(i).mostrarPorPantalla();
+        }
+    }
+}
+package com.ejemplo;
+
+public class ClasePadre {
+
+    public void mostrarPorPantalla() {
+
+        System.out.println("Te escribo como clase Padre");
+    }
+
+}
+package com.ejemplo;
+
+public class ClaseHija2 extends ClasePadre{
+
+    @Override
+    public void mostrarPorPantalla() {
+        // Con super nos referimos al padre
+        super.mostrarPorPantalla();
+        System.out.println("Pero soy la clase hija 2");
+    }
+
+}
+package com.ejemplo;
+
+public class ClaseHija1 extends ClasePadre{
+
+    @Override
+    public void mostrarPorPantalla() {
+        System.out.println("Soy la clase hija 1");
+    }
+
+}
+//////////////////////////////////////////////////////////////////////////
+TRYLOCK V2
+//////////////////////////////////////////////////////////////////////////
+import java.util.ArrayList;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class Main {
+    public static void main(String[] args) {
+        ReentrantLock lockbano1 = new ReentrantLock();
+        ReentrantLock lockbano2 = new ReentrantLock();
+        ArrayList<Jugador> listaJugador=new ArrayList<>();
+
+        for (int i=0;i<10;i++){
+            listaJugador.add(new Jugador("nombre "+i + "", lockbano1,lockbano2));
+        }
+        for (int i=0;i<listaJugador.size();i++){
+            listaJugador.get(i).start();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+class Jugador extends Thread{
+
+    private String nombre;
+    private boolean pisEncima=false;
+    private ReentrantLock lockbano1;
+    private  ReentrantLock lockbano2;
+    Jugador(String nombre, ReentrantLock lockbano1, ReentrantLock lockbano2){
+        this.nombre=nombre;
+        this.lockbano1=lockbano1;
+        this.lockbano2=lockbano2;
+    }
+    @Override
+    public void run() {
+        if(lockbano1.tryLock()) {
+            System.out.println("El jugador " + nombre + " ha entrado al baño1");
+            hacerPisEnBanio();
+            System.out.println("El jugador " + nombre + " ha terminado con el baño1");
+            lockbano1.unlock();
+        }else {
+            if (lockbano2.tryLock()) {
+                System.out.println("El jugador " + nombre + " ha entrado al baño2");
+                hacerPisEnBanio();
+                System.out.println("El jugador " + nombre + " ha terminado con el baño2");
+                lockbano2.unlock();
+            } else {
+                System.out.println("El jugador " + nombre + "  no ha encontrado el baño");
+                hacerPisEncima();
+                System.out.println("El jugador " + nombre + " se ha hecho pis encima");
+            }
+        }
+    }
+    public void hacerPisEnBanio(){
+        try {
+            Thread.sleep(3000);
+            pisEncima=false;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+    public void hacerPisEncima(){
+        try {
+            Thread.sleep(3000);
+            pisEncima=true;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+/////////////////////////////////////////////////////////////////////////
+IPCONFIG
+/////////////////////////////////////////////////////////////////////////
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+
+public class Main {
+
+
+    public static String apellidos = "de Tena Bellmont";
+
+    public static void main(String[] args) {
+        launchIpConfig();
+    }
+
+
+    /**
+     *
+     * @return Devuelve la IP del usuario. Ejemplo:
+     * Direcci¢n IPv4. . . . . . . . . . . . . . : 1.1.1.1
+     */
+    public static String getIp4() {
+        System.out.println(launchIpConfig().get(8));
+        return launchIpConfig().get(8);
+    }
+
+    /**
+     *
+     * @return Devuelve la subred del usuario. Ejemplo: 1.1.1.1
+     * M scara de subred . . . . . . . . . . . . : 1.1.1.1
+     */
+    public static String getSubred() {
+        System.out.println(launchIpConfig().get(9));
+        return launchIpConfig().get(9);
+    }
+
+    /**
+     *
+     * @return Devuelve la subred del usuario. Ejemplo: 1.1.1.1
+     * Puerta de enlace predeterminada . . . . . : 1.1.1.1
+     */
+    public static String getPuertaEnlace() {
+        System.out.println(launchIpConfig().get(10));
+        return launchIpConfig().get(10);
+    }
+
+    private static ArrayList<String> launchIpConfig()  {
+        return launchCommand("ipconfig");
+    }
+
+    private static ArrayList<String> launchCommand(String comando)  {
+        ArrayList<String> out = new ArrayList<>();
+        try {
+            ProcessBuilder builder = new ProcessBuilder(
+                    "cmd.exe", "/c", comando);
+            builder.redirectErrorStream(true);
+            Process p = builder.start();
+            BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String line;
+            while ((line = r.readLine()) != null) {
+                //System.out.println(line);
+                out.add(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return out;
+    }
+
+    public static String hacerPing(String ip)  {
+        ArrayList<String> list = launchCommand("ping " + ip);
+        return list.get(0) + "\n" + list.get(1);
+    }
+}
+/////////////////////////////////////////////////////////////////////////
+BLOC DE NOTAS
+/////////////////////////////////////////////////////////////////////////ç
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+public class Main {
+    public static void main(String[] args) {
+
+        launchProcessAndWaiting();
+        launchProcessAndStopping();
+        launchProcessAndRead();
+    }
+
+    private static void launchProcessAndWaiting() {
+        String path = "C:\\WINDOWS\\system32\\notepad.exe";
+        String[] processToOpen = new String[1];
+        processToOpen[0] = path;
+        ProcessBuilder pb = new ProcessBuilder(processToOpen);
+
+        try {
+            // Creamos un proceso y lo empezamos
+            Process process = pb.start();
+            // Nos quedamos esperando a que termine.
+            int status = process.waitFor();
+            System.out.println("El resultado de la ejecución ha sido " + status);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void launchProcessAndStopping() {
+        String path = "C:\\WINDOWS\\system32\\notepad.exe";
+        String[] processToOpen = new String[1];
+        processToOpen[0] = path;
+        ProcessBuilder pb = new ProcessBuilder(processToOpen);
+
+        try {
+            // Creamos un proceso y lo empezamos
+            Process process = pb.start();
+            Thread.sleep(2000);
+            process.destroy();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void launchProcessAndRead() {
+        try {
+            ProcessBuilder builder = new ProcessBuilder(
+                    "cmd.exe", "/c", "cd \"C:\\\" && dir");
+            builder.redirectErrorStream(true);
+            Process p = builder.start();
+            BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String line;
+            while ((line = r.readLine()) != null) {
+                System.out.println(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
+HILOS 
+//////////////////////////////////////////////////////////////////////////
+public class Hilo extends Thread {
+
+    public String nombre;
+
+    public Hilo(String nombre){
+        this.nombre = nombre;
+    }
+
+    @Override
+    public void run() {
+        System.out.println("Soy el hilo " + nombre + " y me voy a dormir.");
+        try {
+            Thread.sleep(Main.getRandomTimeInMills());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Soy el hilo " + nombre + "y me he despertado.");
+
+    }
+}
+import java.util.Random;
+
+public class Main {
+
+    public static void main(String[] args) {
+        System.out.println("Comenzamos a las " + System.currentTimeMillis());
+
+        Hilo h1 = new Hilo("Hilo 1");
+        Hilo h2 = new Hilo("Hilo 2");
+
+
+
+        try {
+            h1.start();
+            h1.join();
+            h2.start();
+            h2.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
+        System.out.println("Terminamos a las " + System.currentTimeMillis());
+    }
+
+    public static Integer getRandomTimeInMills() {
+        Random r = new Random();
+        return (r.nextInt(3) + 2) * 1000;
+    }
+
+}
+//////////////////////////////////////////////////////////////////////////
+VENDEDOR
+//////////////////////////////////////////////////////////////////////////
+import java.util.ArrayList;
+import java.util.Random;
+
+public class Main {
+    static ArrayList<Cliente> resul = new ArrayList<>();
+    public static void main(String[] args){
+        for (int i=0;i<100;i++){
+            Cliente cliente = new Cliente("Cliente" + i);
+            cliente.start();
+            resul.add(cliente);
+        }
+        for (Cliente h1 : resul) {
+            try {
+                h1.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        }
+        System.out.println("Dinero que ha ganado el vendedor "+ Vendedor.recaudacion+ "€");
+
+    }
+}
+class Cliente extends Thread {
+    public String nombre;
+    ArrayList<Item> Carrito = new ArrayList<>();
+    int contador=100;
+
+
+    public Cliente(String nombre){
+        this.nombre = nombre;
+    }
+    @Override
+    public void run() {
+        while(getRandomBuy()<=contador) {
+            Item item =new Item();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Carrito.add(item);
+            contador -= 10;
+        }
+        Vendedor.cobrar(this);
+
+
+    }
+
+    public static Integer getRandomBuy() {
+        Random r = new Random();
+        return (r.nextInt(100)+1);
+    }
+}
+class Item {
+    String producto="Producto"+getRandom();
+    int precio=getRandomPrecio();
+
+    public static Integer getRandomPrecio() {
+        Random r = new Random();
+        return (r.nextInt(100)+1);
+    }
+    public static Integer getRandom() {
+        Random r = new Random();
+        return (r.nextInt());
+    }
+}
+class Vendedor {
+    static int recaudacion=0;
+    synchronized static void cobrar(Cliente cliente) {
+
+        System.out.println("Lista de la compra: "+ cliente.nombre);
+        for (Item compra: cliente.Carrito) {
+            System.out.println(compra.producto+" "+ compra.precio+ "€");
+            recaudacion+=compra.precio;
+        }
+
+    }
+
+}
+/////////////////////////////////////////////////////////////////////////
+EXAM
+//////////////////////////////////////////////////////////////////////////
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+
+public class Main {
+    public static void main(String[] args) {
+        System.out.println(getIp4());
+        System.out.println(getSubred());
+        System.out.println(getPuertaEnlace());
+        System.out.println(hacerPing(getIp4()));
+        System.out.println(hacerPing(getSubred()));
+        System.out.println(hacerPing(getPuertaEnlace()));
+        }
+
+
+
+        public static String getIp4() {
+            System.out.println(launchIpConfig().get(8));
+            return launchIpConfig().get(8);
+        }
+
+
+        public static String getSubred() {
+            System.out.println(launchIpConfig().get(9));
+            return launchIpConfig().get(9);
+        }
+
+
+        public static String getPuertaEnlace() {
+            System.out.println(launchIpConfig().get(10));
+            return launchIpConfig().get(10);
+        }
+
+        private static ArrayList<String> launchIpConfig()  {
+            return launchCommand("ipconfig");
+        }
+
+        private static ArrayList<String> launchCommand(String comando)  {
+            ArrayList<String> out = new ArrayList<>();
+            try {
+                ProcessBuilder builder = new ProcessBuilder(
+                        "cmd.exe", "/c", comando);
+                builder.redirectErrorStream(true);
+                Process p = builder.start();
+                BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                String line;
+                while ((line = r.readLine()) != null) {
+                    //System.out.println(line);
+                    out.add(line);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return out;
+        }
+    public static String hacerPing(String ip) {
+        String Lines = "";
+        try {
+            ProcessBuilder builder = new ProcessBuilder(
+                    "cmd.exe", "/c", "cd \"C:\\\" && ping \"" + ip+"\"");
+            builder.redirectErrorStream(true);
+            Process p = builder.start();
+            BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String line;
+
+            while ((line = r.readLine()) != null) {
+                Lines += line;
+                Lines += "\n";
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Lines;
+    }
+    }
+//////////////////////////////////////////////////////////////////////////
+COMPRIMIR ZIP
+//////////////////////////////////////////////////////////////////////////
+
+import java.io.File;
+import java.io.IOException;
+
+
+
+public class Main {
+    public static void main(String[] args) {
+        String pathArchivoComprimido = "C:\\NuevaCarpetaComprimida.zip";
+        String pathDescompresion = "C:\\NuevaCarpeta1";
+        String nombreFicheroComprimido = "C:\\Nueva carpeta comprida.zip";
+        String ficherosAComprimir = "C:\\Nueva carpeta";
+       comprimir(nombreFicheroComprimido, ficherosAComprimir);
+        descomprimir(pathArchivoComprimido, pathDescompresion);
+
+        System.out.println(0);
+
+    }
+
+    /**
+     * @param pathArchivoComprimido es la ruta a la carpeta donde están todos los ficheros que quieres descomprimir
+     * @param pathDescompresion     es la ruta a la carpeta donde están todos los ficheros que quieres descomprimir
+     * @return true si ha habido éxito, false si ha habido alguna excepción
+     */
+    private static boolean descomprimir(String pathArchivoComprimido, String pathDescompresion) {
+        try {
+
+            String builder = "\"C:/Program Files/7-Zip/7z.exe\"";
+            String exec = builder + " x " + pathArchivoComprimido + " -o" + pathDescompresion;
+
+            Runtime.getRuntime().exec(exec);
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+
+    private static boolean comprimir(String nombreFicheroComprimido, String ficherosAComprimir) {
+      try {
+         /* ProcessBuilder builder = new ProcessBuilder(
+        "C:\\Program Files\\7-Zip\\7z.exe", " a \""  +nombreFicheroComprimido+"\""+ficherosAComprimir+ "\\");
+           builder.redirectErrorStream(true);
+            Process p = builder.start();
+            BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            */
+          String builder = "\"C:/Program Files/7-Zip/7z.exe\"";
+          String exec = builder + " a " + nombreFicheroComprimido + " -r *.*";
+          File file = new File(ficherosAComprimir);
+          Runtime.getRuntime().exec(exec,null,file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+}
+//////////////////////////////////////////////////////////////////////////
+HILOS PISCINA
+//////////////////////////////////////////////////////////////////////////
+public class Main {
+
+    // Imagina que tenemos una piscina con 4 personas de aforo.
+    // Nuestros bañistas son hilos
+    // Un bañista se queda un rato en la piscina (Tiempo aleatorio)
+    // Cuando uno se va, entra otro
+
+
+    public static void main(String[] args) {
+        for (int i = 0; i<10; i++){
+            Banista b = new Banista(String.valueOf(i));
+            b.start();
+        }
+    }
+}
+import java.util.Random;
+import java.util.concurrent.Semaphore;
+
+public class Piscina {
+
+    private static final int NUM_ACCESO_SIMULTANEOS = 4;
+    static Semaphore semaphore = new Semaphore(NUM_ACCESO_SIMULTANEOS,true);
+
+    static void solicitadAcceso(Banista banista){
+        System.out.println("El " + banista.nombre + "quiere entrar");
+        try {
+            semaphore.acquire(2);
+            banarse(banista);
+            semaphore.release(2);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void banarse(Banista banista){
+        System.out.println("Comienza el baño el banista " + banista.nombre);
+        try {
+            Thread.sleep(((new Random().nextInt(4) ) + 1) * 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        banista.sucio = false;
+        System.out.println("Finaliza el baño el banista " + banista.nombre);
+
+    }
+}
+public class Banista extends Thread {
+
+    boolean sucio = true;
+    String nombre;
+    public Banista(String nombre){
+        this.nombre = nombre;
+    }
+
+    @Override
+    public void run() {
+        Piscina.solicitadAcceso(this);
+        System.out.println("El "+ nombre + "ya se ha bañado y está Sucio = " + sucio);
+    }
+}
+//////////////////////////////////////////////////////////////////////////
+POLIMORFISMO
+//////////////////////////////////////////////////////////////////////////
+public class Main {
+
+    public static void main(String[] args) {
+        escribirNombre("Carlos");
+        escribirNombre("Carlos", "de Tena");
+        escribirNombre("Carlos", "de Tena", "Bellmont");
+    }
+
+    public static void escribirNombre(String nombre, String primerApellido, String segundoApellido){
+        System.out.println(nombre + " " + primerApellido + " " + segundoApellido);
+    }
+
+    public static void escribirNombre(String nombre, String primerApellido){
+        System.out.println(nombre + " " + primerApellido);
+    }
+
+    public static void escribirNombre(String nombre){
+        System.out.println(nombre);
+    }
+
+}
+
+////////////////////////////////////////////////////////////////////////
+MODIFICADORES
+////////////////////////////////////////////////////////////////////////
+public class Main {
+
+    public static void main(String[] args) {
+        sumandoNumerosFamosos();
+        sumandoNumerosFamososDeFormaEstatica();
+        sumandoNumerosFamososDeFormaMixta();
+    }
+
+    private static void sumandoNumerosFamosos(){
+        System.out.println("Sumando numeros famosos");
+        int numero1 = 1;
+        int numero2 = 2;
+        SumarNumerosFamosos sumarNumerosFamosos = new SumarNumerosFamosos();
+        float resultado1 = sumarNumerosFamosos.sumarE(numero1);
+        float resultado2 = sumarNumerosFamosos.sumarPi(numero2);
+        System.out.println("Si al numero " + numero1 + ", le sumamos E, el resultado es " + resultado1);
+        System.out.println("Si al numero " + numero2 + ", le sumamos Pi, el resultado es " + resultado2);
+    }
+
+    private static void sumandoNumerosFamososDeFormaEstatica(){
+        System.out.println("Sumando numeros famosos de forma estática");
+        int numero1 = 1;
+        int numero2 = 2;
+        float resultado1 = SumarNumerosFamososDeFormaEstatica.sumarE(numero1);
+        float resultado2 = SumarNumerosFamososDeFormaEstatica.sumarPi(numero2);
+        System.out.println("Si al numero " + numero1 + ", le sumamos E, el resultado es " + resultado1);
+        System.out.println("Si al numero " + numero2 + ", le sumamos Pi, el resultado es " + resultado2);
+    }
+
+    private static void sumandoNumerosFamososDeFormaMixta(){
+        System.out.println("Sumando numeros famosos de forma mixta");
+        int numero1 = 1;
+        int numero2 = 2;
+        float resultado1 = SumarNumerosFamososDeFormaMixta.sumarE(numero1);
+        // al sumarPi no ser estática
+        // float resultado2 = SumarNumerosFamososDeFormaMixta.sumarPi(numero2);
+        // por tanto habría que crear un objeto
+        SumarNumerosFamososDeFormaMixta sumarNumerosFamososDeFormaMixta = new SumarNumerosFamososDeFormaMixta();
+        float resultado2 = sumarNumerosFamososDeFormaMixta.sumarPi(numero2);
+        System.out.println("Si al numero " + numero1 + ", le sumamos E, el resultado es " + resultado1);
+        System.out.println("Si al numero " + numero2 + ", le sumamos Pi, el resultado es " + resultado2);
+    }
+}
+public class SumarNumerosFamosos {
+
+    private final float valorPi = 3.1416f;
+    private final float valorE = 2.71828f;
+
+    private float sumarNumero(int numero1, float numeroFamoso){
+        return numero1 + numeroFamoso;
+    }
+    public float sumarPi(int numero){
+        return sumarNumero(numero,valorPi);
+    }
+
+    public float sumarE(int numero){
+        return sumarNumero(numero,valorE);
+    }
+}
+public class SumarNumerosFamososDeFormaEstatica {
+
+    private static final float valorPi = 3.1416f;
+    private static final float valorE = 2.71828f;
+
+    private static float sumarNumero(int numero1, float numeroFamoso){
+        return numero1 + numeroFamoso;
+    }
+    public static float sumarPi(int numero){
+        return sumarNumero(numero,valorPi);
+    }
+
+    public static float sumarE(int numero){
+        return sumarNumero(numero,valorE);
+    }
+
+}
+public class SumarNumerosFamososDeFormaMixta {
+
+    private static final float valorPi = 3.1416f;
+    private static final float valorE = 2.71828f;
+
+    private static float sumarNumero(int numero1, float numeroFamoso){
+        return numero1 + numeroFamoso;
+    }
+    public float sumarPi(int numero){
+        return sumarNumero(numero,valorPi);
+    }
+
+    public static float sumarE(int numero){
+        return sumarNumero(numero,valorE);
+    }
+
+}
+/////////////////////////////////////////////////////////////////////////
+NO LO SE 
+/////////////////////////////////////////////////////////////////////////
+public class Main {
+
+    public static void main(String[] args) {
+        functionUsoDelIf(1);
+        functionUsoDelIfElse(2);
+        functionUsoDelSwitch(3);
+    }
+
+    public static void functionUsoDelIf(int variable){
+        System.out.println("---functionUsoDelIf---\nLa variable vale: " + variable);
+        if (variable == 1){
+            System.out.println("Esta línea se ejecuta si la variable vale 1");
+        }
+        System.out.println("Esta línea se ejecuta siempre");
+    }
+
+    public static void functionUsoDelIfElse(int variable){
+        System.out.println("---functionUsoDelIfElse---\nLa variable vale: " + variable);
+        if (variable == 1){
+            System.out.println("Esta línea se ejecuta si la variable vale 1");
+        } else {
+            System.out.println("Esta línea se ejecuta si la variable no vale 1");
+        }
+        System.out.println("Esta línea se ejecuta siempre");
+    }
+
+    public static void functionUsoDelSwitch(int variable){
+        System.out.println("---functionUsoDelSwitch---\nLa variable vale: " + variable);
+        switch (variable){
+            case 1: {
+                System.out.println("Esta línea se ejecuta si la variable vale 1");
+                break;
+            }
+            case 2: {
+                System.out.println("Esta línea se ejecuta si la variable vale 2");
+                break;
+            }
+            case 3: {
+                System.out.println("Esta línea se ejecuta si la variable vale 3");
+                break;
+            }
+            default: {
+                System.out.println("Esta línea se ejecuta si la variable no vale ni 1 ni 2 ni 3");
+                break;
+            }
+        }
+        System.out.println("Esta línea se ejecuta siempre");
+    }
+
+}
+
+
+//////////////////////////////////////////////////////////////////////
+
+EJER ITV Y COCCHES
+
+
+
+//////////////////////////////////////////////////////////////////////////
+
+
+import java.util.concurrent.Semaphore;
+import java.util.PriorityQueue;
+
+class ITV {
+	private Semaphore semaforo;
+	private PriorityQueue <Integer> listaCoches;
+	private Integer tiempoTotal;
+
+	public ITV() {
+		semaforo = new Semaphore(1);
+		listaCoches = new PriorityQueue <Integer>();
+		tiempoTotal = 0;
+	}
+
+	public void nuevoCoche(Integer numeroCoche) {
+		try {
+			semaforo.acquire();
+			listaCoches.add(numeroCoche);
+			semaforo.release();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public int terminarCoche(Integer tiempoParcial) {
+		int coche=0;
+		try {
+			if (isCochesPendientes()) {
+				semaforo.acquire();
+				coche = listaCoches.poll();
+				tiempoTotal += tiempoParcial;
+				semaforo.release();
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return coche;
+	}
+
+	public boolean isCochesPendientes() {
+		return listaCoches.size() > 0;
+	}
+	
+	public Integer getTiempoTotal () {
+		return tiempoTotal;
+	}
+	
+}
+
+class Puesto extends Thread {
+	private int identif;
+	private ITV itv;
+	private Integer tiempoPuesto;
+
+	public Puesto(int identif, ITV itv) {
+		this.identif = identif;
+		this.itv = itv;
+		this.tiempoPuesto=0;
+	}
+
+	public void run() {
+		int retardo;
+		int numeroCoche;
+		while (itv.isCochesPendientes()) {
+			try {
+				retardo = (int) (Math.random() * 90 + 10);
+				tiempoPuesto +=retardo;
+				numeroCoche=itv.terminarCoche(retardo);
+				sleep(retardo);
+				System.out.println("El puesto " + identif + " ha revisado el coche " + numeroCoche + " en un tiempo de " + retardo);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		System.out.println("Fin del puesto " + identif + ", que termina con un tiempo parcial de " + tiempoPuesto);
+	}
+}
+
+class Vehiculo extends Thread {
+	private int identif;
+	private ITV itv;
+
+	public Vehiculo(int identif, ITV itv) {
+		this.identif = identif;
+		this.itv = itv;
+	}
+
+	public void run() {
+		itv.nuevoCoche(identif);
+	}
+}
+
+public class Principal {
+
+	public static void main(String[] args) {
+		int pueRandom = (int) (Math.random() * 4) + 1;
+		int vehRandom = (int) (Math.random() * 30) + 20;
+		ITV itv = new ITV();
+		System.out.println(vehRandom + " Vehículos serán atendidos por " + pueRandom + " puestos.");
+		// Creación de vehículos
+		Vehiculo[] v = new Vehiculo[vehRandom];
+		for (int i = 0; i < vehRandom; i++) {
+			v[i] = new Vehiculo(i + 1, itv);
+			v[i].start();
+		}
+		// Creación de puestos
+		Puesto[] p = new Puesto[pueRandom];
+		for (int i = 0; i < pueRandom; i++) {
+			p[i] = new Puesto(i + 1, itv);
+			p[i].start();
+		}
+
+		// Se espera a que terminen todos los puestos
+		for (int i = 0; i < pueRandom; i++) {
+			try {
+				p[i].join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		// Se espera a que terminen todos vehículos
+		for (int i = 0; i < vehRandom; i++) {
+			try {
+				v[i].join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		// Se cierra la itv
+		System.out.println("Se cierra la ITV con un tiempo acumulado de " + itv.getTiempoTotal());
+	}
+}
+
+
+
+
+FIN
+

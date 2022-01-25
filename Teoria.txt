@@ -1,0 +1,490 @@
+for (int i = 1; i <= 100; i++) {
+            Hilo h1 = new Hilo("Hilo " + i);
+            h1.start();
+            list.add(h1);
+        }
+
+        for (Hilo j : list) {
+            System.out.println("Soy el " + j.nombre + " y he dormido " + j.tiempodormido);
+        }
+
+******************************************************
+-->CREAR UN NUMERO DE HILOS
+-->AÑADIRLOS A UN ARRAYLIST
+-->MOSTRARLOS POR PANTALLA RECORRIENDO EL ARRAYLIST.
+******************************************************
+
+///////////
+///////////
+
+public static class Hilo extends Thread {
+
+        Random r = new Random();
+        long tiempodormido = 0;
+        public String nombre;
+
+        public Hilo(String nombre) {
+            this.nombre = nombre;
+        }
+
+        @Override
+        public void run() {
+
+            try {
+                tiempodormido = r.nextInt(3000);
+                Thread.sleep(tiempodormido);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
+******************************************************
+-->CREAR CLASES HILOS
+-->HACER QUE LOS HILOS DUERMAN DE FORMA ALEATORIA ENTRE UN RANGO(1000 - 3000)
+-->HACER CONSTRUCTOR CON EL NOMBRE PARA PODER INDICAR EL NOMBRE DEL HILO
+	-->LO DE DENTRO DEL CONSTRUCTOR ES LO QUE AÑADES AL CREAR LOS HILOS
+******************************************************
+
+///////////
+///////////
+
+class Luchador extends Thread{
+
+    boolean bonus;
+    int puntuacion;
+
+    public Luchador(boolean bonus, int puntuacion){
+
+        this.bonus = bonus;
+        this.puntuacion = puntuacion;
+
+    }
+
+    @Override
+    public void run() {
+        Batalla.AddParticipante(this);
+    }
+
+}
+
+******************************************************
+-->CREAR HILOS CON LAS CARACTERISTICAS DE BONUS Y PUNTUACION
+-->DENTRO DEL RUN SE LLAMA A LA CLASE BATALLA Y A LA FUNCION ADDPARTICIPANTE
+******************************************************
+
+///////////
+///////////
+
+class Batalla{
+
+static AtomicInteger entero = new AtomicInteger(0);
+
+******************************************************
+--> SE USA PARA DARLE UN VALOR FIJO A UN ATRIBUTO
+******************************************************
+
+static AtomicBoolean primero = new AtomicBoolean(false); 
+
+******************************************************
+--> SE USA PARA DARLE UN VALOR FIJO A UN ATRIBUTO
+******************************************************
+
+static Semaphore s = new Semaphore(10); 
+
+******************************************************
+-->NUMERO DE HILOS QUE VAMOS A DEJAR PASAR POR EL SEMAFORO
+-->CREAR UN SEMAFORO PARA IR DEJENADO PASAR A UNA CANTIDAD DE HILOS CONCRETAS
+******************************************************
+
+public static void AddParticipante(Luchador luchador){
+            s.acquire();
+            s.release();
+    }
+
+******************************************************
+-->TICKETS QUE SE DAN A CADA HILO
+-->TICKETS QUE SE DEVUELVE CADA VEZ QUE ACABA UN HILO
+******************************************************
+
+public static void PuntuacionFinal(Luchador luchador){
+
+      int min =1;
+      int max=10;
+
+      Random random = new Random();
+      luchador.puntuacion = random.nextInt(max) + min;
+
+******************************************************
+-->CALCULAR LAS PUNTUACIONES DE UN LUCHADOR DE FORMA ALEATORIA ENTRE DOS VALORES
+******************************************************
+
+///////////
+///////////
+
+private static void anadirNumerosConsecutivos(ArrayList<Integer> listaNumeros, int numero){
+        listaNumeros.add(numero);
+        listaNumeros.add(++numero);
+        listaNumeros.add(++numero);
+    }
+
+-->LO QUE ESTA DENTRO DEL PARENTESIS LO VAMOS A PODER UTLIZAR YA QUE LO HACEMOS REFERENCIA DEL QUE ESTA EN EL MAIN
+
+///////////
+///////////
+
+public Clase1(){
+System.out.println("El constructor sin parámetros se ha ejecutado. El valor de myInt es " + myInt + "; el valor por defecto.");
+    }
+
+******************************************************
+-->CONSTRUCTOR SIN PARAMETRO
+-->EL VALOR QUE COJE ES EL CREADO EN LA VARIABLE
+******************************************************
+
+public Clase1(int initialValue){      
+myInt = initialValue;
+
+System.out.println("El constructor con parámetro int se ha ejecutado. El valor de myInt será " + myInt);
+    }
+
+******************************************************
+-->CONSTRCUTOR CON PARAMETRO
+-->EL VALOR QUE COJE ES EL VALOR QUE SE LE DA AL CREAR LA CLASE
+******************************************************
+
+public Clase1(String initialValue){
+
+myInt = Integer.parseInt(initialValue);
+
+System.out.println("El constructor con parámetros String se ha ejecutado. El valor de myInt será " + myInt);
+    }
+
+******************************************************
+-->CONSTRCUTOR CON PARAMETRO PERO STRING
+-->SE INTERCAMBIA EL STRING POR UN INT
+-->EL VALOR QUE COJE ES EL VALOR QUE SE LE DA AL CREAR LA CLASE COMO SE LE METE POR PARAMETRO UN STRING SE METE UN STRING EN LA CLASE COMO VALOR "1"
+******************************************************
+
+///////////
+///////////
+
+public class ClaseHija1 extends ClasePadre{
+
+    @Override
+    public void mostrarPorPantalla() {
+        System.out.println("Soy la clase hija 1");
+    }
+
+}
+
+******************************************************
+-->HEREDAR UNA CLASE DE OTRA CLASE PADRE
+-->EN EL EXTENDS SE PONE EL NOMBRE DE LA CLASE PADRE DE LA CUAL ESTAMOS HEREDANDO
+******************************************************
+
+///////////
+///////////
+
+public class ClaseHija2 extends ClasePadre{
+
+    @Override
+    public void mostrarPorPantalla() {
+        super.mostrarPorPantalla();
+        System.out.println("Pero soy la clase hija 2");
+    }
+
+}
+
+******************************************************
+-->HEREDAR UNA CLASE DE OTRA CLASE PADRE
+-->EN EL EXTENDS SE PONE EL NOMBRE DE LA CLASE PADRE DE LA CUAL ESTAMOS HEREDANDO
+-->CON LA SENTENCIA SUPER. LLAMA A LA CLASE PADRE DE LA HERENCIA Y SACA EL CONTENIDO CUANDO SE EJECUTA LA CLASE EN LA QUE SE INTRODUCE LA SENTENCIA.
+******************************************************
+
+///////////
+///////////
+
+public class Clase1 implements MostrablePorPantalla {
+    @Override
+    public void mostrarPorPantalla() {
+        System.out.println("Soy la clase 1");
+    }
+}
+
+******************************************************
+-->LLAMA A LA CLASE INTERFAZ QUE HACE REFERENCIA
+******************************************************
+
+///////////
+///////////
+
+public interface MostrablePorPantalla {
+    void mostrarPorPantalla();
+}
+
+******************************************************
+-->CREAR INTERFAZ
+******************************************************
+
+///////////
+///////////
+
+ public static void main(String[] args) {
+        System.out.println("Escribe un número");
+        int numero = readIntFromKeyboard();
+        System.out.print("Has escrito el número " + numero);
+    }
+
+******************************************************
+-->ESCRIBIR POR TECLADO UN NUMERO
+******************************************************
+
+ private static int readIntFromKeyboard(){
+        Integer result;
+        Scanner keyboardReader = new Scanner(System.in);
+        do {
+            String selectedOption = keyboardReader.nextLine();
+            try {
+                result = Integer.parseInt(selectedOption);
+            } catch (NumberFormatException e){
+                System.out.println("El String introducido no es un número. Introduce un \"int\"");
+                result = null;
+            }
+        } while (result == null);
+        keyboardReader.close();
+        return result;
+    }
+
+******************************************************
+-->CONDICION PARA QUE AL ESCRIBIR POR TECLADO SOLO TE DEJE ESCRIBIR NUMEROS
+******************************************************
+
+///////////
+///////////
+
+public int getAtributoInt1() {
+        return atributoInt1;
+    }
+
+******************************************************
+-->USAR RETURN
+******************************************************
+
+///////////
+///////////
+
+class Cuadrilatero {
+
+    private static final int NUM_ACCESO_SIMULTANEOS = 2;
+    static Semaphore semaphore = new Semaphore(NUM_ACCESO_SIMULTANEOS,true);
+
+    static void addParticipante(Luchador luchador){
+
+        System.out.println("El luchador " + luchador.getName()+ " quiere entrar");
+
+        try {
+            semaphore.acquire(1);
+            luchar(luchador);
+            semaphore.release(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+******************************************************
+-->CREAR UN SEMAFORO QUE SOLO PERMITA PASAR DOS PERSONAS 
+-->FUNCION PARA AÑADIR LOS PARTICIPANTES
+******************************************************
+
+///////////
+///////////
+
+private static void luchar(Luchador luchador){
+
+        System.out.println("Comienza la lucha el luchador " + luchador.getName());
+
+        try {
+            Thread.sleep(((new Random().nextInt(2) ) ) * 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        luchador.ganador = false;
+
+        System.out.println("El luchador " + luchador.getName() + " queda eliminado");
+
+    }
+
+******************************************************
+-->CREAR TIEMPO ALEATORIO DE DORMIR LOS HILOS
+******************************************************
+
+///////////
+///////////
+
+public synchronized static int sacarDinero(int cantidad) throws InterruptedException {
+ }
+
+******************************************************
+-->CREAR UN SYNCHRONIZED
+******************************************************
+
+///////////
+///////////
+
+static ReentrantLock lock = new ReentrantLock();
+
+******************************************************
+-->CREAR PARA HACER UN LOCK
+******************************************************
+
+///////////
+///////////
+
+public static void atenderAlHilo(Hilo hilo){
+        try {
+            System.out.println("He llegado!! " + hilo.id);
+
+            lock.lock();
+
+            System.out.println("Estoy tratando al hilo " + hilo.id);
+            Thread.sleep(1000);
+            System.out.println("He termiando de tratar al hilo " + hilo.id);
+
+            lock.unlock();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+******************************************************
+-->EL LOCK DEJA PASAR DE 1 EN 1
+******************************************************
+
+///////////
+///////////
+
+public void run() {
+        do {
+
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            contador++;
+        }while(getRandomSleep()==1);
+        System.out.println("Soy el hilo nº " + nombre + " y me he repetido " + contador + " veces");
+
+    }
+
+public static Integer getRandomSleep() {
+        Random r = new Random();
+        return (r.nextInt(2));
+    }
+
+******************************************************
+-->CONTAR CUENTAS VECES SE DUERME UN HILO
+******************************************************
+
+///////////
+///////////
+
+ public static Integer getRandomTimeInMills() {
+        Random r = new Random();
+        return (r.nextInt(3) + 2) * 1000; 
+    }
+
+******************************************************
+-->RANDOM DEL 2-5
+******************************************************
+
+///////////
+///////////
+
+ for (Jugador j : jugadoresArrayList) {
+        if (Maxpuntuacion <= j.getPuntacion()) {
+            Maxpuntuacion = j.getPuntacion();
+
+        }
+    }
+    for (Jugador r : jugadoresArrayList) {
+       if(r.getPuntacion()==Maxpuntuacion)
+           ganador+= r.getName()+ " ha ganado con una puntuacion de: " + Maxpuntuacion + "\n";
+    }
+    System.out.println(ganador);
+}
+
+******************************************************
+-->FORMA DE CALCULAR LA PUNTUACION MAXIMA DE UN JUGADOR
+-->SI TIENE DOS GANADORES TE SACA LOS DOS
+******************************************************
+
+///////////
+///////////
+
+public Persona(String nombre, String primerApellido, String segundoApellido, int edad) {
+
+            this.nombre=nombre;
+            this.primerApellido=primerApellido;
+            this.segundoApellido=segundoApellido;
+            this.edad=edad;
+
+            anglosajon= segundoApellido == null || segundoApellido.contentEquals("");
+
+            System.out.println("Nombre: " + nombre  + " "+primerApellido+ " "+segundoApellido+ " edad: " +edad);
+            System.out.println("No anglosajon");
+
+        }
+
+******************************************************
+-->CONSTRUCTOR PARA SABER SI ALGUN OBJETO CONTIENE O NO LO QUE PEDIMOS
+******************************************************
+
+///////////
+///////////
+
+class Jugador extends Thread {
+
+    private String nombre;
+    private boolean pisEncima = false;
+    ReentrantLock lockBanio1;
+    ReentrantLock lockBanio2;
+
+    Jugador(String nombre, ReentrantLock lockBanio1, ReentrantLock lockBanio2){
+        this.nombre = nombre;
+        this.lockBanio1 = lockBanio1;
+        this.lockBanio2 = lockBanio2;
+    }
+
+    @Override
+    public void run() {
+
+        if (lockBanio1.tryLock()) {
+            System.out.println("El jugador " + nombre + "ha entrado al baño 1");
+            hacerPisEnBanio();
+            System.out.println("El jugador " + nombre + "ha terminado con el baño 1");
+            lockBanio1.unlock();
+        } else {
+            if (lockBanio2.tryLock()) {
+                System.out.println("El jugador " + nombre + "ha entrado al baño 2");
+                hacerPisEnBanio();
+                System.out.println("El jugador " + nombre + "ha terminado con el baño 2");
+                lockBanio2.unlock();
+            } else {
+                System.out.println("El jugador " + nombre + "no ha encontrado baño");
+                hacerPisEncima();
+                System.out.println("El jugador " + nombre + "se ha hecho pis encima");
+            }
+        }
+    }
+
+******************************************************
+--> USAR TRYLOCK
+-->SE USA TRYLOCK PARA PONER CONDICIONES A UN HILO
+-->LA DIFERENCIA ENTRE LOCK Y UN TRYLOCK, ES QUE EL TRYLOCK ES UN METODO DENTRO DEL LOCK, QUE SE USA CUANDO QUEREMOS HACER UNA CONDICION (IF)
+******************************************************

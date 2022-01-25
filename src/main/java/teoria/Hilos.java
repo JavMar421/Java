@@ -1,8 +1,9 @@
+/*
 package teoria;
 
 import java.util.Random;
 
-public class Hilos {
+public class Hilossss {
     public static void main(String[] args) throws InterruptedException {
         //crear 100 hilos
         for (int i = 0; i < 10; i++) {
@@ -39,4 +40,4 @@ class Hilo extends Thread {
         System.out.println("Soy el hilo " + namenum + " he dormido "+ num +" milis y me he despertado.");
 
     }
-}
+}*/
